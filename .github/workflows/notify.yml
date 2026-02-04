@@ -1,3 +1,24 @@
+Skip to content
+katieann7
+push-notif
+Repository navigation
+Code
+Issues
+3
+ (3)
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Notify on Main Branch Push
+with email #5
+All jobs
+Run details
+Workflow file for this run
+.github/workflows/notify.yml at b2757ca
 name: Notify on Main Branch Push
 
 on:
@@ -24,10 +45,24 @@ jobs:
               title: "Push to main branch",
               body: `
               A push was made to the **main** branch.
-
               **Author:** ${context.payload.head_commit.author.name}
               **Message:** ${context.payload.head_commit.message}
-
               **Compare:** ${context.payload.compare}
               `
             })
+      # 2️⃣ Email Notification
+      - name: Send Email Notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Push to main branch"
+          body: |
+            A push was made to the **main** branch.
+            Author: ${{ github.event.head_commit.author.name }}
+            Message: ${{ github.event.head_commit.message }}
+            Compare: ${{ github.event.compare }}
+          to: ${{ secrets.EMAIL_TO }}
+          from: ${{ secrets.SMTP_USERNAME }}
