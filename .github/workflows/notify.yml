@@ -31,16 +31,3 @@ jobs:
               **Compare:** ${context.payload.compare}
               `
             })
-
-      # 2️⃣ Slack Notification
-      - name: Send Slack Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_TITLE: Push Notification
-          SLACK_COLOR: good
-          SLACK_MESSAGE: >
-            A push was made to the main branch by
-            ${{ github.event.head_commit.author.name }}.
-            Commit message: "${{ github.event.head_commit.message }}".
-            See changes: ${{ github.event.compare }}
