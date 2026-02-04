@@ -6,14 +6,14 @@ on:
       - main
 
 permissions:
-  issues: write
+  issues: write   # Needed for GitHub Issue creation
 
 jobs:
   notify:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ GitHub Notification (via Issue)
+      # 1️⃣ GitHub Issue Notification
       - name: Create GitHub Issue Notification
         uses: actions/github-script@v7
         with:
@@ -31,3 +31,21 @@ jobs:
               **Compare:** ${context.payload.compare}
               `
             })
+
+      # 2️⃣ Email Notification
+      - name: Send Email Notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Push to main branch"
+          body: |
+            A push was made to the **main** branch.
+
+            Author: ${{ github.event.head_commit.author.name }}
+            Message: ${{ github.event.head_commit.message }}
+            Compare: ${{ github.event.compare }}
+          to: ${{ secrets.EMAIL_TO }}
+          from: ${{ secrets.SMTP_USERNAME }}
