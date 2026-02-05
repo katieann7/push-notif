@@ -1,4 +1,4 @@
-name: Notify on Pull Request Events
+name: Pull Request Notifications
 
 on:
   pull_request:
@@ -15,36 +15,17 @@ jobs:
       # -------------------------------
       # 1️⃣ PR Trigger Notification
       # -------------------------------
-      - name: Create GitHub Issue for PR Trigger
-        if: github.event.action != 'closed' || (github.event.action == 'closed' && github.event.pull_request.merged == false)
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr = context.payload.pull_request;
-            const body =
-              '@' + pr.user.login + ' has triggered a pull request targeting **' + pr.base.ref + '** branch.\n\n' +
-              '**PR Title:** ' + pr.title + '\n' +
-              '**Author:** ' + pr.user.login + '\n' +
-              '**PR URL:** ' + pr.html_url;
-
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: 'Pull Request Triggered',
-              body: body
-            });
-
-      - name: Send Email for PR Trigger
+      - name: Notify PR Trigger
         if: github.event.action != 'closed' || (github.event.action == 'closed' && github.event.pull_request.merged == false)
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          from: ${{ secrets.SMTP_USERNAME }}
-          to: ${{ secrets.EMAIL_TO }}
-          subject: "Pull Request Triggered"
+          server_address: ${{ secrets.SMTP_SERVER }}   # e.g., smtp.gmail.com
+          server_port: ${{ secrets.SMTP_PORT }}       # e.g., 587
+          username: ${{ secrets.SMTP_USERNAME }}      # your email
+          password: ${{ secrets.SMTP_PASSWORD }}      # app password
+          from: "Team Notifications <${{ secrets.SMTP_USERNAME }}>"  # sender name + email
+          to: ${{ secrets.EMAIL_TO }}                 # recipient(s)
+          subject: "[PR Triggered] ${{ github.event.pull_request.title }}"
           body: |
             A pull request has been triggered for the branch: ${{ github.event.pull_request.base.ref }}.
 
@@ -55,27 +36,7 @@ jobs:
       # -------------------------------
       # 2️⃣ PR Merged Notification
       # -------------------------------
-      - name: Create GitHub Issue for PR Merge
-        if: github.event.pull_request.merged == true
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr = context.payload.pull_request;
-            const body =
-              '@' + pr.merged_by.login + ' merged a pull request into **' + pr.base.ref + '** branch.\n\n' +
-              '**PR Title:** ' + pr.title + '\n' +
-              '**Author:** ' + pr.user.login + '\n' +
-              '**Merged By:** ' + pr.merged_by.login + '\n' +
-              '**PR URL:** ' + pr.html_url;
-
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: 'Pull Request Merged',
-              body: body
-            });
-
-      - name: Send Email for PR Merge
+      - name: Notify PR Merged
         if: github.event.pull_request.merged == true
         uses: dawidd6/action-send-mail@v3
         with:
@@ -83,9 +44,9 @@ jobs:
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          from: ${{ secrets.SMTP_USERNAME }}
+          from: "Team Notifications <${{ secrets.SMTP_USERNAME }}>"  # sender name + email
           to: ${{ secrets.EMAIL_TO }}
-          subject: "Pull Request Merged"
+          subject: "[PR Merged] ${{ github.event.pull_request.title }}"
           body: |
             A pull request has been merged into the branch: ${{ github.event.pull_request.base.ref }}.
 
