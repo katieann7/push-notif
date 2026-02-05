@@ -3,6 +3,8 @@ name: Pull Request Notifications
 on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review, closed]
+    branches:
+      - main
 
 permissions:
   issues: write
@@ -12,9 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # -------------------------------
-      # 1️⃣ PR Trigger Notification
-      # -------------------------------
+
       - name: Notify PR Trigger
         if: github.event.action != 'closed' || (github.event.action == 'closed' && github.event.pull_request.merged == false)
         uses: dawidd6/action-send-mail@v3
@@ -33,9 +33,6 @@ jobs:
             Author: ${{ github.event.pull_request.user.login }}
             URL: ${{ github.event.pull_request.html_url }}
 
-      # -------------------------------
-      # 2️⃣ PR Merged Notification
-      # -------------------------------
       - name: Notify PR Merged
         if: github.event.pull_request.merged == true
         uses: dawidd6/action-send-mail@v3
